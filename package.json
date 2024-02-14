@@ -1,0 +1,51 @@
+{
+  "name": "@omer-x/react-component-tree-parser",
+  "version": "0.1.0",
+  "description": "Provides a function to parse react component tree of a tsx file",
+  "keywords": [
+    "react",
+    "component",
+    "tree",
+    "parser"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omermecitoglu/react-component-tree-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/omermecitoglu/react-component-tree-parser/issues"
+  },
+  "homepage": "https://github.com/omermecitoglu/react-component-tree-parser#readme",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "name": "Omer Mecitoglu",
+    "email": "omer.mecitoglu@gmail.com",
+    "url": "https://omermecitoglu.github.io"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "webpack build --progress --mode=production"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@babel/parser": "^7.23.9",
+    "@babel/traverse": "^7.23.9",
+    "json5": "^2.2.3"
+  },
+  "devDependencies": {
+    "@omer-x/eslint-config": "^1.0.5",
+    "@types/babel__traverse": "^7.20.5",
+    "@types/node": "^20.11.17",
+    "clean-webpack-plugin": "^4.0.0",
+    "eslint": "^8.56.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4"
+  }
+}
