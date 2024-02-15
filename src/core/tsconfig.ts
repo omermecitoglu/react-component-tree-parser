@@ -12,7 +12,14 @@ export default function getTypeScriptConfig(): TypeScriptConfig {
   try {
     const configPath = path.resolve(process.cwd(), "tsconfig.json");
     const rawJson = fs.readFileSync(configPath, "utf8");
-    return json5.parse(rawJson);
+    const parsedJson = json5.parse(rawJson);
+    return {
+      ...parsedJson,
+      compilerOptions: {
+        paths: {},
+        ...parsedJson.compilerOptions,
+      },
+    };
   } catch {
     return { compilerOptions: { paths: {} } };
   }
