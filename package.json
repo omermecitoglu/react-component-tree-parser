@@ -36,7 +36,8 @@
   "dependencies": {
     "@babel/parser": "^7.23.9",
     "@babel/traverse": "^7.23.9",
-    "json5": "^2.2.3"
+    "json5": "^2.2.3",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@omer-x/eslint-config": "^1.0.5",
