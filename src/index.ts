@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { parse } from "@babel/parser";
 import traverse from "@babel/traverse";
+import { uuid } from "uuidv4";
 import { resolvePath } from "./core/path";
 import type { JSXElement, Node } from "@babel/types";
 
@@ -14,6 +15,8 @@ type Component = {
   isClient: boolean,
   isList: boolean,
   isLogical: boolean,
+  isConditional: boolean,
+  link: string,
   isConnection: boolean,
   ownChildren: Component[],
   children: Component[],
@@ -52,18 +55,37 @@ function catchLogicalExpression(node: Node) {
   return node.expression.right;
 }
 
+function catchConditionalExpression(node: Node) {
+  if (node.type !== "JSXExpressionContainer") return null;
+  if (node.expression.type !== "ConditionalExpression") return null;
+  if (node.expression.consequent.type !== "JSXElement") return null;
+  if (node.expression.alternate.type !== "JSXElement") return null;
+  return [
+    node.expression.consequent,
+    node.expression.alternate,
+  ];
+}
+
 function getComponentChildren(children: Node[], connections: Connection[], isClient: boolean) {
   return children.reduce<Component[]>((collection, child) => {
     if (child.type === "JSXElement") {
-      return [...collection, generateComponent(child, connections, isClient, false, false)];
+      return [...collection, generateComponent(child, connections, isClient, false, false, false)];
     }
     const listItem = catchListedElement(child);
     if (listItem) {
-      return [...collection, generateComponent(listItem, connections, isClient, true, false)];
+      return [...collection, generateComponent(listItem, connections, isClient, true, false, false)];
     }
     const logical = catchLogicalExpression(child);
     if (logical) {
-      return [...collection, generateComponent(logical, connections, isClient, false, true)];
+      return [...collection, generateComponent(logical, connections, isClient, false, true, false)];
+    }
+    const conditional = catchConditionalExpression(child);
+    if (conditional) {
+      const link = uuid();
+      return [
+        ...collection,
+        ...conditional.map(e => generateComponent(e, connections, isClient, false, false, true, link)),
+      ];
     }
     return collection;
   }, []);
@@ -75,6 +97,8 @@ function generateComponent(
   isClient: boolean,
   isList: boolean,
   isLogical: boolean,
+  isConditional: boolean,
+  link: string = "",
 ): Component {
   const name = getComponentName(node);
   const connection = connections.find(c => c.modules.includes(name));
@@ -83,6 +107,8 @@ function generateComponent(
     isClient,
     isList,
     isLogical,
+    isConditional,
+    link,
     isConnection: !!connection,
     ownChildren: connection ? parseComponentTree(connection.path, isClient) : [],
     children: getComponentChildren(node.children, connections, false),
@@ -113,7 +139,7 @@ export default function parseComponentTree(componentPath: string, forcedClient: 
       if (components.length) return;
       const rootElement = p.parent.type === "JSXFragment" ? p.parent : p.node;
       if (rootElement.type === "JSXElement") {
-        components.push(generateComponent(rootElement, connections, isClient, false, false));
+        components.push(generateComponent(rootElement, connections, isClient, false, false, false));
       } else {
         components.push(...getComponentChildren(rootElement.children, connections, isClient));
       }
