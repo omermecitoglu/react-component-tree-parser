@@ -13,6 +13,7 @@ type Component = {
   name: string,
   isClient: boolean,
   isList: boolean,
+  isLogical: boolean,
   isConnection: boolean,
   ownChildren: Component[],
   children: Component[],
@@ -43,27 +44,45 @@ function catchListedElement(node: Node) {
   return argument.body;
 }
 
+function catchLogicalExpression(node: Node) {
+  if (node.type !== "JSXExpressionContainer") return null;
+  if (node.expression.type !== "LogicalExpression") return null;
+  if (node.expression.operator !== "&&") return null;
+  if (node.expression.right.type !== "JSXElement") return null;
+  return node.expression.right;
+}
+
 function getComponentChildren(children: Node[], connections: Connection[], isClient: boolean) {
   return children.reduce<Component[]>((collection, child) => {
     if (child.type === "JSXElement") {
-      return [...collection, generateComponent(child, connections, isClient, false)];
-    } else {
-      const listItem = catchListedElement(child);
-      if (listItem) {
-        return [...collection, generateComponent(listItem, connections, isClient, true)];
-      }
+      return [...collection, generateComponent(child, connections, isClient, false, false)];
+    }
+    const listItem = catchListedElement(child);
+    if (listItem) {
+      return [...collection, generateComponent(listItem, connections, isClient, true, false)];
+    }
+    const logical = catchLogicalExpression(child);
+    if (logical) {
+      return [...collection, generateComponent(logical, connections, isClient, false, true)];
     }
     return collection;
   }, []);
 }
 
-function generateComponent(node: JSXElement, connections: Connection[], isClient: boolean, isList: boolean): Component {
+function generateComponent(
+  node: JSXElement,
+  connections: Connection[],
+  isClient: boolean,
+  isList: boolean,
+  isLogical: boolean,
+): Component {
   const name = getComponentName(node);
   const connection = connections.find(c => c.modules.includes(name));
   return {
     name,
     isClient,
     isList,
+    isLogical,
     isConnection: !!connection,
     ownChildren: connection ? parseComponentTree(connection.path, isClient) : [],
     children: getComponentChildren(node.children, connections, false),
@@ -94,7 +113,7 @@ export default function parseComponentTree(componentPath: string, forcedClient: 
       if (components.length) return;
       const rootElement = p.parent.type === "JSXFragment" ? p.parent : p.node;
       if (rootElement.type === "JSXElement") {
-        components.push(generateComponent(rootElement, connections, isClient, false));
+        components.push(generateComponent(rootElement, connections, isClient, false, false));
       } else {
         components.push(...getComponentChildren(rootElement.children, connections, isClient));
       }
