@@ -1,6 +1,6 @@
 {
   "name": "@omer-x/react-component-tree-parser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Provides a function to parse react component tree of a tsx file",
   "keywords": [
     "react",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "scripts": {
     "test": "ts-mocha -p tsconfig.json src/**/*.test.ts",
-    "dev": "tsc --watch",
+    "dev": "webpack build --progress --mode=development --watch",
     "build": "webpack build --progress --mode=production"
   },
   "main": "./dist/index.js",
