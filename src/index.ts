@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { parse } from "@babel/parser";
 import traverse from "@babel/traverse";
-import { fixPath, getFullPath } from "./core/path";
+import { resolvePath } from "./core/path";
 import type { JSXElement, Node } from "@babel/types";
 
 type Connection = {
@@ -71,7 +71,8 @@ function generateComponent(node: JSXElement, connections: Connection[], isClient
 }
 
 export default function parseComponentTree(componentPath: string, forcedClient: boolean) {
-  const code = fs.readFileSync(componentPath, "utf8");
+  const path = resolvePath(componentPath);
+  const code = fs.readFileSync(path.absolute, "utf8");
   const isClient = forcedClient || (/["']use client["']/).test(code);
   const ast = parse(code, {
     sourceType: "module",
@@ -81,13 +82,11 @@ export default function parseComponentTree(componentPath: string, forcedClient: 
   const components: Component[] = [];
   traverse(ast, {
     ImportDeclaration(p) {
-      const importPath = p.node.source.value;
-      const isRelative = (/^\.\.?\//).test(importPath);
-      const resolvedPath = fixPath(importPath);
-      if ((/^\.\.?\//).test(resolvedPath)) {
+      const modulePath = resolvePath(p.node.source.value, path.absolute);
+      if (!modulePath.isExternal) {
         connections.push({
           modules: p.node.specifiers.map(s => s.local.name),
-          path: getFullPath(componentPath, resolvedPath, isRelative),
+          path: modulePath.absolute,
         });
       }
     },
