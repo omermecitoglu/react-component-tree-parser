@@ -27,6 +27,7 @@
   },
   "license": "MIT",
   "scripts": {
+    "test": "ts-mocha -p tsconfig.json src/**/*.test.ts",
     "dev": "tsc --watch",
     "build": "webpack build --progress --mode=production"
   },
@@ -40,10 +41,14 @@
   "devDependencies": {
     "@omer-x/eslint-config": "^1.0.5",
     "@types/babel__traverse": "^7.20.5",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.17",
+    "chai": "^4.3.10",
     "clean-webpack-plugin": "^4.0.0",
     "eslint": "^8.56.0",
     "ts-loader": "^9.5.1",
+    "ts-mocha": "^10.0.0",
     "typescript": "^5.3.3",
     "webpack": "^5.90.1",
     "webpack-cli": "^5.1.4"
