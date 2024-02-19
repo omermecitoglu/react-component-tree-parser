@@ -91,10 +91,16 @@ function getComponentChildren(children: Node[], connections: Connection[], isCli
   }, []);
 }
 
+function isClientComponent(componentPath: string) {
+  const path = resolvePath(componentPath);
+  const code = fs.readFileSync(path.absolute, "utf8");
+  return (/["']use client["']/).test(code);
+}
+
 function generateComponent(
   node: JSXElement,
   connections: Connection[],
-  isClient: boolean,
+  forcedClient: boolean,
   isList: boolean,
   isLogical: boolean,
   isConditional: boolean,
@@ -102,6 +108,7 @@ function generateComponent(
 ): Component {
   const name = getComponentName(node);
   const connection = connections.find(c => c.modules.includes(name));
+  const isClient = forcedClient || (connection ? isClientComponent(connection.path) : false);
   return {
     name,
     isClient,
@@ -111,7 +118,7 @@ function generateComponent(
     link,
     isConnection: !!connection,
     ownChildren: connection ? parseComponentTree(connection.path, isClient) : [],
-    children: getComponentChildren(node.children, connections, false),
+    children: getComponentChildren(node.children, connections, forcedClient),
   };
 }
 
@@ -140,7 +147,7 @@ export default function parseComponentTree(componentPath: string, forcedClient: 
       const rootElement = p.parent.type === "JSXFragment" ? p.parent : p.node;
       if (rootElement.type === "JSXElement") {
         components.push(generateComponent(rootElement, connections, isClient, false, false, false));
-      } else {
+      } else { // Fragment
         components.push(...getComponentChildren(rootElement.children, connections, isClient));
       }
     },
