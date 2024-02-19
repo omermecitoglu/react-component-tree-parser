@@ -1,6 +1,6 @@
 {
   "name": "@omer-x/react-component-tree-parser",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Provides a function to parse react component tree of a tsx file",
   "keywords": [
     "react",
@@ -32,7 +32,11 @@
     "build": "webpack build --progress --mode=production"
   },
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./index.d.ts",
+  "files": [
+    "dist/",
+    "./index.d.ts"
+  ],
   "dependencies": {
     "@babel/parser": "^7.23.9",
     "@babel/traverse": "^7.23.9",
