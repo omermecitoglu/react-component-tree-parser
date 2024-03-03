@@ -123,34 +123,41 @@ function generateComponent(
 }
 
 export default function parseComponentTree(componentPath: string, forcedClient: boolean) {
-  const path = resolvePath(componentPath);
-  const code = fs.readFileSync(path.absolute, "utf8");
-  const isClient = forcedClient || (/["']use client["']/).test(code);
-  const ast = parse(code, {
-    sourceType: "module",
-    plugins: ["jsx", "typescript"],
-  });
-  const connections: Connection[] = [];
-  const components: Component[] = [];
-  traverse(ast, {
-    ImportDeclaration(p) {
-      const modulePath = resolvePath(p.node.source.value, path.absolute);
-      if (!modulePath.isExternal) {
-        connections.push({
-          modules: p.node.specifiers.map(s => s.local.name),
-          path: modulePath.absolute,
-        });
-      }
-    },
-    JSXElement(p) {
-      if (components.length) return;
-      const rootElement = p.parent.type === "JSXFragment" ? p.parent : p.node;
-      if (rootElement.type === "JSXElement") {
-        components.push(generateComponent(rootElement, connections, isClient, false, false, false));
-      } else { // Fragment
-        components.push(...getComponentChildren(rootElement.children, connections, isClient));
-      }
-    },
-  });
-  return components;
+  try {
+    const path = resolvePath(componentPath);
+    const code = fs.readFileSync(path.absolute, "utf8");
+    const isClient = forcedClient || (/["']use client["']/).test(code);
+    const ast = parse(code, {
+      sourceType: "module",
+      plugins: ["jsx", "typescript"],
+    });
+    const connections: Connection[] = [];
+    const components: Component[] = [];
+    traverse(ast, {
+      ImportDeclaration(p) {
+        const modulePath = resolvePath(p.node.source.value, path.absolute);
+        if (!modulePath.isExternal) {
+          connections.push({
+            modules: p.node.specifiers.map(s => s.local.name),
+            path: modulePath.absolute,
+          });
+        }
+      },
+      JSXElement(p) {
+        if (components.length) return;
+        const rootElement = p.parent.type === "JSXFragment" ? p.parent : p.node;
+        if (rootElement.type === "JSXElement") {
+          components.push(generateComponent(rootElement, connections, isClient, false, false, false));
+        } else { // Fragment
+          components.push(...getComponentChildren(rootElement.children, connections, isClient));
+        }
+      },
+    });
+    return components;
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("EISDIR")) {
+      throw new Error(`Invalid component path: ${componentPath}`);
+    }
+    throw error;
+  }
 }
