@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { parse } from "@babel/parser";
 import traverse from "@babel/traverse";
-import { uuid } from "uuidv4";
+import { v4 as uuid } from "uuid";
 import { resolvePath } from "./core/path";
 import type { JSXElement, Node } from "@babel/types";
 

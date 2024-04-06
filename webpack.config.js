@@ -40,7 +40,7 @@ module.exports = {
     /^@babel\/parser$/,
     /^@babel\/traverse$/,
     "json5",
-    "uuidv4",
+    "uuid",
   ],
   externalsType: "commonjs",
 };
