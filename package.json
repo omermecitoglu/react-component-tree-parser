@@ -1,6 +1,6 @@
 {
   "name": "@omer-x/react-component-tree-parser",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "description": "Provides a function to parse react component tree of a tsx file",
   "keywords": [
     "react",
@@ -50,6 +50,7 @@
     "@types/uuid": "^9.0.8",
     "clean-webpack-plugin": "^4.0.0",
     "eslint": "^9.0.0",
+    "semantic-release": "^24.1.2",
     "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
